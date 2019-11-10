@@ -67,6 +67,7 @@ class RPMCVEToMongoTestCase(unittest.TestCase):
                          'CVE-2007-1592',
                          'CVE-2007-3379']
         self.assertEqual(cve_expected, result[0]['cve'])
+        self.assertEqual("kernel-doc", result[0]['packagedata']['name'])
 
 
 if __name__ == '__main__':

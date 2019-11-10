@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 import os
+import re
 
 import pymongo
 import requests
@@ -38,9 +39,14 @@ class RPMCVE2Mongo(object):
                                           serverSelectionTimeoutMS=5)
 
         self.db = self.client[dbname]
+        self.regex_package = re.compile(r"^(?P<name>.*)-(?P<epoch>\d+):(?P<version>.*)-(?P<release>.*)")
 
     def create_indexes(self):
         self.db[self.dbcollection].create_index([("@rpm", pymongo.ASCENDING)], background=True)
+        self.db[self.dbcollection].create_index([
+                                                ("packagedata.name", pymongo.ASCENDING),
+                                                ("packagedata.release", pymongo.ASCENDING),
+                                                ("packagedata.version", pymongo.ASCENDING)], background=True)
 
     def download_list(self):
         r = requests.get(self.rpm_to_cve_url)
@@ -53,6 +59,9 @@ class RPMCVE2Mongo(object):
         operations = []
         rpms = xmltodict.parse(self.raw_rpm_cve_data)
         for rpm in rpms['rpms']['rpm']:
+            m = self.regex_package.match(rpm['@rpm'])
+            if m:
+                rpm['packagedata'] = m.groupdict()
             tmp = UpdateOne({"@rpm": rpm['@rpm']}, {"$set": rpm}, upsert=True)
             operations.append(tmp)
 
