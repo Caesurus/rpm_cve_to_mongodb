@@ -6,7 +6,7 @@
 3) Information should be upserted so that data in mongo is updated when run an no duplicates occur
 
 ## Run
-`python rpm_cve_to_mongo.py -s "mongodb://localhost" -u username -p password`
+`./rpm_cve_to_mongo.py -s "mongodb://localhost" -u username -p password`
 
 ## Mongo DB
 Given the right permissions, the script will create a `RPMINFO` DB, with a `rpm2cve` collection.
@@ -17,3 +17,14 @@ use RPMINFO
 db.getCollection('rpm2cve').find({}).count()
 ```
 returns `30467` documents
+
+
+## Installing
+
+```
+git clone git@github.com:Caesurus/rpm_cve_to_mongodb.git
+mkvirtualenv --python=`which python3` rpm_cve
+workon rpm_cve
+pip install -r requirements.txt
+./rpm_cve_to_mongo.py -s "mongodb://localhost" -u username -p password
+```
